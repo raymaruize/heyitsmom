@@ -29,5 +29,14 @@ export function getSupabaseClient() {
   return supabaseClient
 }
 
-// Export singleton instance
-export const supabase = getSupabaseClient()
+// Export lazy client proxy so importing this module during build doesn't crash.
+// Actual client initialization happens when a property is accessed at runtime.
+type SupabaseClient = ReturnType<typeof createClient>
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getSupabaseClient() as any
+    const value = client[prop as keyof typeof client]
+    return typeof value === 'function' ? value.bind(client) : value
+  },
+})
