@@ -141,10 +141,10 @@ export default function DailyDetailPage() {
             {
               student_id: userId,
               date: date,
-              overall_mood: null,
+              overall_mood: null as string | null,
               daily_comment: '',
             },
-          ])
+          ] as any)
           .select()
           .single();
 
