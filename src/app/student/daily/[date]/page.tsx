@@ -154,16 +154,17 @@ export default function DailyDetailPage() {
         throw error;
       }
 
-      if (!record) throw new Error('Failed to load or create daily record');
+      const typedRecord = record as DailyRecord | null;
+      if (!typedRecord) throw new Error('Failed to load or create daily record');
 
-      setDailyRecord(record);
-      setPendingDailyComment(record.daily_comment || '');
+      setDailyRecord(typedRecord);
+      setPendingDailyComment(typedRecord.daily_comment || '');
 
       // Get hourly entries
       const { data: entries, error: entriesError } = await supabase
         .from('hourly_entries')
         .select('*')
-        .eq('daily_record_id', record.id)
+        .eq('daily_record_id', typedRecord.id)
         .order('hour', { ascending: true });
 
       if (entriesError) throw entriesError;
@@ -197,7 +198,7 @@ export default function DailyDetailPage() {
       let { data: foodData, error: foodError } = await supabase
         .from('food_records')
         .select('*')
-        .eq('daily_record_id', record.id)
+        .eq('daily_record_id', typedRecord.id)
         .single();
 
       if (foodError && foodError.code === 'PGRST116') {
@@ -206,7 +207,7 @@ export default function DailyDetailPage() {
           .from('food_records')
           .insert([
             {
-              daily_record_id: record.id,
+              daily_record_id: typedRecord.id,
               selected_items: [],
               extra_snacks_text: '',
               outside_food_text: '',
