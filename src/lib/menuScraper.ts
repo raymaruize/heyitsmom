@@ -1,11 +1,13 @@
 import * as cheerio from 'cheerio'
 
+interface MealSection {
+  sectionName: string
+  items: string[]
+}
+
 interface MealPeriod {
   name: string
-  sections: {
-    sectionName: string
-    items: string[]
-  }[]
+  sections: MealSection[]
 }
 
 interface ParsedMenu {
@@ -44,7 +46,7 @@ export async function fetchAndParseMenu(date: string): Promise<ParsedMenu | null
     // Parse meal periods and sections
     const mealPeriods: MealPeriod[] = []
     let currentMealPeriod: MealPeriod | null = null
-    let currentSection: { sectionName: string; items: string[] } | null = null
+    let currentSection: MealSection | null = null
 
     // Main parsing loop - iterate through all content
     $('*').each((_, elem) => {
@@ -120,9 +122,11 @@ export async function fetchAndParseMenu(date: string): Promise<ParsedMenu | null
     })
 
     // Save last section and meal period
-    if (currentMealPeriod) {
-      if (currentSection && currentSection.items.length > 0) {
-        currentMealPeriod.sections.push(currentSection)
+    const finalMealPeriod = currentMealPeriod as MealPeriod | null
+    if (finalMealPeriod) {
+      const finalSection = currentSection as MealSection | null
+      if (finalSection && finalSection.items.length > 0) {
+        finalMealPeriod.sections.push(finalSection)
       }
     }
 

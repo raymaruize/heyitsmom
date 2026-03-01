@@ -170,7 +170,8 @@ export default function DailyDetailPage() {
       if (entriesError) throw entriesError;
 
       // Ensure all hours exist
-      const entriesMap = new Map(entries.map(e => [e.hour, e]));
+      const typedEntries = (entries || []) as HourlyEntry[];
+      const entriesMap = new Map(typedEntries.map(e => [e.hour, e]));
       const allEntries = HOURS.map(hour => 
         entriesMap.get(hour) || {
           id: `temp-${hour}`,
@@ -212,7 +213,7 @@ export default function DailyDetailPage() {
               extra_snacks_text: '',
               outside_food_text: '',
             },
-          ])
+          ] as any)
           .select()
           .single();
 
@@ -222,10 +223,11 @@ export default function DailyDetailPage() {
         throw foodError;
       }
 
-      setFoodRecord(foodData);
+      const typedFoodData = foodData as FoodRecord | null;
+      setFoodRecord(typedFoodData);
       setPendingFoodTexts({
-        extra_snacks: foodData.extra_snacks_text || '',
-        outside_food: foodData.outside_food_text || '',
+        extra_snacks: typedFoodData?.extra_snacks_text || '',
+        outside_food: typedFoodData?.outside_food_text || '',
       });
 
       // Fetch menu for the selected date only
@@ -264,18 +266,21 @@ export default function DailyDetailPage() {
               hour,
               [field]: value,
             },
-          ])
+          ] as any)
           .select()
           .single();
 
         if (error) throw error;
 
+        const typedData = data as HourlyEntry | null;
+        if (!typedData) throw new Error('Failed to create hourly entry');
+
         setHourlyEntries(hourlyEntries.map(e => 
-          e.hour === hour ? { ...e, ...data, id: data.id } : e
+          e.hour === hour ? { ...e, ...typedData, id: typedData.id } : e
         ));
       } else if (entry?.id) {
         // Update existing entry
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('hourly_entries')
           .update({ [field]: value })
           .eq('id', entry.id);
@@ -299,7 +304,7 @@ export default function DailyDetailPage() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('daily_records')
         .update({ [field]: value })
         .eq('id', dailyRecord.id);
@@ -320,7 +325,7 @@ export default function DailyDetailPage() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('food_records')
         .update({ [field]: value })
         .eq('id', foodRecord.id);

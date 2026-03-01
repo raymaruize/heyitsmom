@@ -54,8 +54,8 @@ export default function StudentDashboard() {
         console.error('Error loading invite code:', error);
         throw error;
       }
-      console.log('Loaded invite code:', data?.invite_code);
-      setInviteCode(data?.invite_code || '------');
+      const inviteData = data as { invite_code: string | null } | null;
+      setInviteCode(inviteData?.invite_code || '------');
     } catch (err) {
       console.error('Error loading invite code:', err);
       setInviteCode('------');
@@ -80,7 +80,7 @@ export default function StudentDashboard() {
         .lte('date', endDate);
 
       if (error) throw error;
-      setRecords(data || []);
+      setRecords(((data || []) as DailyRecord[]));
     } catch (err: any) {
       console.error('Error loading records:', err);
     } finally {
