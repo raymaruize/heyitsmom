@@ -154,6 +154,8 @@ export default function DailyDetailPage() {
         throw error;
       }
 
+      if (!record) throw new Error('Failed to load or create daily record');
+
       setDailyRecord(record);
       setPendingDailyComment(record.daily_comment || '');
 
