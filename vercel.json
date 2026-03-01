@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/refresh-menu",
+      "schedule": "0 5 * * *",
+      "timezone": "America/New_York"
+    }
+  ]
+}
