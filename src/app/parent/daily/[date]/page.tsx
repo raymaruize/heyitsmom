@@ -140,32 +140,35 @@ export default function ParentDailyReadOnlyPage() {
 
       setStudentName((studentProfile as any)?.display_name || 'Student');
 
-      const { data: record } = await supabase
+      const { data: record, error: recordError } = await supabase
         .from('daily_records')
         .select('id, overall_mood, daily_comment')
         .eq('student_id', studentId)
         .eq('date', date)
         .maybeSingle();
 
-      setDailyRecord(record || null);
+      if (record) {
+        const typedRecord = record as DailyRecord;
+        setDailyRecord(typedRecord);
 
-      if (record?.id) {
         const { data: entries } = await supabase
           .from('hourly_entries')
           .select('hour, activity_text, mood, comment')
-          .eq('daily_record_id', record.id)
+          .eq('daily_record_id', typedRecord.id)
           .order('hour', { ascending: true });
 
         console.log('DEBUG: Fetching food record');
-      const { data: food } = await supabase
+        const { data: food } = await supabase
           .from('food_records')
           .select('selected_items, extra_snacks_text, outside_food_text')
-          .eq('daily_record_id', record.id)
+          .eq('daily_record_id', typedRecord.id)
           .maybeSingle();
 
         setHourlyEntries(entries || []);
         console.log('DEBUG: foodRecord fetched:', food);
         setFoodRecord(food || null);
+      } else {
+        setDailyRecord(null);
       }
 
       const menuRes = await fetch(`/api/menu?date=${date}`);
